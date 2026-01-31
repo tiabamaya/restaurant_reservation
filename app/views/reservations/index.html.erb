@@ -1,0 +1,8 @@
+<h1>Reservations (Protected)</h1>
+<p>Welcome, <%= current_user.email %>!</p>
+
+<% if current_user.admin? %>
+  <p><%= link_to "Go to Admin Dashboard", admin_root_path %></p>
+<% end %>
+
+<%= button_to "Log out", destroy_user_session_path, method: :delete %>

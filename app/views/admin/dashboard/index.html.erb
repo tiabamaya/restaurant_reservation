@@ -1,0 +1,4 @@
+<h1>Admin::Dashboard (Admin-only)</h1>
+<p>Welcome, Admin: <%= current_user.email %></p>
+<%= button_to "Log out", destroy_user_session_path, method: :delete %>
+
