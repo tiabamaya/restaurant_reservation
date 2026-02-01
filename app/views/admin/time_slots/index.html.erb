@@ -1,0 +1,50 @@
+<h1>Time Slots</h1>
+
+<%= form_with url: admin_time_slots_path, method: :get, local: true do %>
+  <%= date_field_tag :date, @date %>
+  <%= submit_tag "OK" %>
+<% end %>
+
+<p>
+  <%= link_to "Prev", admin_time_slots_path(date: (@date - 1.day)) %> |
+  <%= link_to "Next", admin_time_slots_path(date: (@date + 1.day)) %>
+</p>
+
+<p><%= link_to "+ New Time Slot", new_admin_time_slot_path %></p>
+
+<table border="1" cellpadding="8">
+    <thead>
+        <tr>
+        <th>Starts At</th>
+        <th>Max Tables</th>
+        <th>Active?</th>
+        <th>Available Tables</th>
+        <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <% if @time_slots.any? %>
+        <% @time_slots.each do |s| %>
+            <tr>
+            <td><%= s.starts_at.strftime("%B %d, %Y • %-I:%M %p") %></td>
+            <td><%= s.max_tables %></td>
+            <td><%= s.active ? "Yes" : "No" %></td>
+            <td><%= s.available_tables %></td>
+            <td>
+                <%= link_to "Edit", edit_admin_time_slot_path(s) %>
+                <%= button_to (s.active ? "Deactivate" : "Activate"),
+                    toggle_active_admin_time_slot_path(s),
+                    method: :patch %>
+            </td>
+            </tr>
+        <% end %>
+        <% else %>
+        <tr>
+            <td colspan="5">No time slots for this date.</td>
+        </tr>
+        <% end %>
+    </tbody>
+</table>
+
+<p><%= link_to "Back to Dashboard", admin_dashboard_path %></p>

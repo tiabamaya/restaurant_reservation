@@ -22,5 +22,13 @@ Rails.application.routes.draw do
   namespace :admin do
     root "dashboard#index"
     get "dashboard", to: "dashboard#index"
+
+      resources :time_slots, only: [:index, :new, :create, :edit, :update] do
+      member { patch :toggle_active }
+    end
+
+      resources :reservations, only: [:index] do
+      member { patch :cancel }
+    end
   end
 end

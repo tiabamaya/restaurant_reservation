@@ -1,0 +1,24 @@
+<h1>New Time Slot</h1>
+
+<% if flash[:alert] %>
+  <p style="color:red;"><%= flash[:alert] %></p>
+<% end %>
+
+<%= form_with model: @time_slot, url: admin_time_slots_path do |f| %>
+  <p>
+    <%= f.label :starts_at %><br>
+    <%= f.datetime_local_field :starts_at %>
+  </p>
+
+  <p>
+    <%= f.label :max_tables %><br>
+    <%= f.number_field :max_tables, min: 1 %>
+  </p>
+
+  <p>
+    <%= f.label :active %>
+    <%= f.check_box :active %>
+  </p>
+
+  <%= f.submit "Create" %>
+<% end %>

@@ -1,0 +1,46 @@
+<h1>Reservations (Admin)</h1>
+
+<%= form_with url: admin_reservations_path, method: :get, local: true do %>
+  <%= date_field_tag :date, @date %>
+  <%= submit_tag "Go" %>
+<% end %>
+
+<p>
+  <%= link_to "Prev", admin_reservations_path(date: (@date - 1.day)) %> |
+  <%= link_to "Next", admin_reservations_path(date: (@date + 1.day)) %>
+</p>
+
+
+<table border="1" cellpadding="8">
+  <thead>
+    <tr>
+      <th>Date & Time</th>
+      <th>User</th>
+      <th>Guests</th>
+      <th>Contact</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @reservations.each do |r| %>
+      <tr>
+        <td><%= r.reserved_at.strftime("%B %d, %Y • %-I:%M %p") %></td>
+        <td><%= r.user.email %></td>
+        <td><%= r.party_size %></td>
+        <td><%= r.contact_name %> / <%= r.contact_phone %></td>
+        <td><%= r.status %></td>
+        <td>
+          <% if r.booked? %>
+            <%= button_to "Cancel", cancel_admin_reservation_path(r), method: :patch %>
+          <% else %>
+            —
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<p><%= link_to "Back to Dashboard", admin_dashboard_path %></p>

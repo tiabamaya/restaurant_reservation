@@ -1,4 +1,9 @@
-<h1>Admin::Dashboard (Admin-only)</h1>
+<h1>Admin Dashboard</h1>
 <p>Welcome, Admin: <%= current_user.email %></p>
-<%= button_to "Log out", destroy_user_session_path, method: :delete %>
 
+<p>
+  <%= link_to "Manage Time Slots", admin_time_slots_path %> |
+  <%= link_to "View Reservations", admin_reservations_path %>
+</p>
+
+<%= button_to "Log out", destroy_user_session_path, method: :delete %>

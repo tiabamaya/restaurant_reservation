@@ -8,6 +8,7 @@ class Reservation < ApplicationRecord
   validates :party_size, presence: true, numericality: { greater_than: 0 }
   validates :contact_name, presence: true
   validates :contact_phone, presence: true
+  before_validation :normalize_reserved_at
 
   validate :must_be_at_least_two_hours_ahead, if: :enforce_booking_rules?
   validate :slot_must_have_available_tables, if: :enforce_booking_rules?
@@ -41,5 +42,9 @@ class Reservation < ApplicationRecord
     return errors.add(:reserved_at, "is not a valid slot.") if slot.nil?
 
     errors.add(:reserved_at, "is fully booked.") if slot.available_tables <= 0
+  end
+
+  def normalize_reserved_at
+    self.reserved_at = reserved_at&.change(sec: 0)
   end
 end
