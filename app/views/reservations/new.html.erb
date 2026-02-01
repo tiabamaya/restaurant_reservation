@@ -1,0 +1,44 @@
+<h1>Book a Reservation</h1>
+
+<%= form_with url: new_reservation_path, method: :get, local: true do %>
+  <%= date_field_tag :date, @selected_date %>
+  <%= submit_tag "OK" %>
+<% end %>
+
+<% if flash[:alert] %>
+  <p style="color:red;"><%= flash[:alert] %></p>
+<% end %>
+
+<%= form_with model: @reservation, url: confirm_reservations_path, data: { turbo: false } do |f| %>
+  <p>
+    <%= f.label :reserved_at, "Time Slot" %><br>
+
+    <%= f.select :reserved_at,
+      @time_slots.map { |s|
+        label = "#{s.starts_at.strftime("%B %d, %Y • %-I:%M %p")} (#{s.available_tables} tables left)"
+        value = s.starts_at.change(sec: 0).iso8601
+        [label, value]
+      },
+      { prompt: "Select a slot" }
+    %>
+    
+  </p>
+
+  <p>
+    <%= f.label :party_size, "Number of guests" %><br>
+    <%= f.number_field :party_size, min: 1 %>
+  </p>
+
+  <p>
+    <%= f.label :contact_name %><br>
+    <%= f.text_field :contact_name %>
+  </p>
+
+  <p>
+    <%= f.label :contact_phone %><br>
+    <%= f.text_field :contact_phone %>
+  </p>
+
+  <%= f.submit "Review Reservation" %>
+  <%= link_to "Back", reservations_path %>
+<% end %>

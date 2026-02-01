@@ -1,0 +1,23 @@
+<h1>Review Reservation</h1>
+
+<p>Please confirm your details before submitting.</p>
+
+<ul>
+  <li><strong>Date & Time:</strong> <%= @reservation.reserved_at.strftime("%B %d, %Y • %-I:%M %p") %></li>
+  <li><strong>Number of guests:</strong> <%= @reservation.party_size %></li>
+  <li><strong>Contact name:</strong> <%= @reservation.contact_name %></li>
+  <li><strong>Contact phone:</strong> <%= @reservation.contact_phone %></li>
+</ul>
+
+<hr>
+
+<%= form_with model: @reservation, url: reservations_path, data: { turbo: false } do |f| %>
+
+  <%= f.hidden_field :reserved_at %>
+  <%= f.hidden_field :party_size %>
+  <%= f.hidden_field :contact_name %>
+  <%= f.hidden_field :contact_phone %>
+
+  <%= f.submit "Confirm Reservation" %>
+  <%= link_to "Edit", new_reservation_path %>
+<% end %>

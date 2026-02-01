@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  starts_at: 2026-02-01 09:39:37
+  max_tables: 1
+
+two:
+  starts_at: 2026-02-01 09:39:37
+  max_tables: 1

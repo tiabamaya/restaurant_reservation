@@ -1,8 +1,43 @@
-<h1>Reservations (Protected)</h1>
+<h1>My Reservations</h1>
 <p>Welcome, <%= current_user.email %>!</p>
+
+<% if flash[:alert] %>
+  <p style="color:red;"><%= flash[:alert] %></p>
+<% end %>
+
+<p>
+  <%= link_to "Book a Reservation", new_reservation_path, class: "btn" %>
+</p>
+
+<%= button_to "Log out", destroy_user_session_path, method: :delete %>
+
+<hr>
+
+<% if @reservations.blank? %>
+  <p>No reservations yet.</p>
+<% else %>
+  <ul>
+    <% @reservations.each do |r| %>
+      <li>
+        <strong><%= r.reserved_at.strftime("%B %d, %Y • %-I:%M %p") %></strong>
+        — Number of guests: <%= r.party_size %>
+
+        <%= link_to "View", reservation_path(r) %>
+        
+        — <%= r.status %>
+
+        <% if r.booked? %>
+          <%= button_to "Cancel",
+            reservation_path(r),
+            method: :delete,
+            data: { turbo_confirm: "Cancel this reservation?" } %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
 
 <% if current_user.admin? %>
   <p><%= link_to "Go to Admin Dashboard", admin_root_path %></p>
 <% end %>
-
-<%= button_to "Log out", destroy_user_session_path, method: :delete %>
