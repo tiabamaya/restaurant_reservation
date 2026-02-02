@@ -6,6 +6,6 @@ class CreateTimeSlots < ActiveRecord::Migration[8.1]
       t.boolean :active, default: true, null: false
       t.timestamps
     end
-    add_index :time_slots, :starts_at
+    add_index :time_slots, :starts_at, unique: true
   end
 end

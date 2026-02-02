@@ -2,8 +2,141 @@
 <p>Welcome, Admin: <%= current_user.email %></p>
 
 <p>
-  <%= link_to "Manage Time Slots", admin_time_slots_path %> |
-  <%= link_to "View Reservations", admin_reservations_path %>
+  <%= button_to "Log out", destroy_user_session_path, method: :delete %>
 </p>
 
-<%= button_to "Log out", destroy_user_session_path, method: :delete %>
+<hr>
+
+<h2>Reservation Calendar</h2>
+
+<p>
+  <%= link_to "← Prev Month", admin_dashboard_path(date: (@month - 1.month).to_date) %> |
+  <strong><%= @month.strftime("%B %Y") %></strong> |
+  <%= link_to "Next Month →", admin_dashboard_path(date: (@month + 1.month).to_date) %>
+</p>
+
+<p>
+  <span style="padding:4px 8px; background:#c9f7c9;">Green: Plenty available</span>
+  <span style="padding:4px 8px; background:#fff3b0;">Yellow: Limited</span>
+  <span style="padding:4px 8px; background:#ffb3b3;">Red: Fully booked</span>
+</p>
+
+<table border="1" cellpadding="10" style="border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @calendar_days.each_slice(7) do |week| %>
+      <tr>
+        <% week.each do |day| %>
+          <% summary = @daily_summary[day] %>
+          <% pct = summary[:percent_available] %>
+
+          <% bg =
+              if pct <= 0
+                "#ffb3b3"   # red
+              elsif pct <= 40
+                "#fff3b0"   # yellow
+              else
+                "#c9f7c9"   # green
+              end %>
+
+          <% muted = (day.month != @month.month) ? "opacity:0.4;" : "" %>
+          <% selected = (day == @date) ? "outline:3px solid #333;" : "" %>
+
+          <td style="background:<%= bg %>; <%= muted %> <%= selected %>">
+            <%= link_to day.day, admin_dashboard_path(date: day), style: "text-decoration:none;color:#000;" %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Time Slots for <%= @date.strftime("%B %d, %Y") %></h2>
+
+<p>
+  <%= link_to "Prev Day", admin_dashboard_path(date: (@date - 1.day)) %> |
+  <%= link_to "Next Day", admin_dashboard_path(date: (@date + 1.day)) %>
+</p>
+
+<p>
+  <%= link_to "+ New Time Slot", new_admin_time_slot_path(date: @date) %>
+</p>
+
+<table border="1" cellpadding="8" style="border-collapse:collapse; width:100%;">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Active</th>
+      <th>Availability</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @time_slots.each do |s| %>
+      <tr>
+        <td><%= s.starts_at.strftime("%-I:%M %p") %></td>
+        <td><%= s.active ? "Yes" : "No" %></td>
+        <td><%= s.availability_label %></td>
+        <td>
+          <%= link_to "Edit", edit_admin_time_slot_path(s) %>
+          |
+          <%= button_to (s.active ? "Deactivate" : "Activate"),
+                toggle_active_admin_time_slot_path(s),
+                method: :patch,
+                form: { style: "display:inline" } %>
+          |
+          <%= link_to "View reservations",
+                admin_dashboard_path(date: @date, slot_id: s.id, anchor: "slot_reservations") %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if @selected_slot.present? %>
+  <hr>
+  <a id="slot_reservations"></a>
+  <h2>Reservations for <%= @date.strftime("%B %d, %Y") %> • <%= @selected_slot.starts_at.strftime("%-I:%M %p") %></h2>
+
+  <h3>Booked</h3>
+  <% if @booked_reservations.any? %>
+    <ul>
+      <% @booked_reservations.each do |r| %>
+        <li>
+          <strong><%= r.user.email %></strong>
+          — Guests: <%= r.party_size %>
+          — <%= r.contact_name %> / <%= r.contact_phone %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No booked reservations.</p>
+  <% end %>
+
+  <h3>Cancelled</h3>
+  <% if @cancelled_reservations.any? %>
+    <ul>
+      <% @cancelled_reservations.each do |r| %>
+        <li style="opacity:0.7;">
+          <strong><%= r.user.email %></strong>
+          — Guests: <%= r.party_size %>
+          — <%= r.contact_name %> / <%= r.contact_phone %>
+
+        <%= button_to "Delete",
+          admin_reservation_path(r),
+          method: :delete,
+          data: { confirm: "Permanently delete this cancelled reservation?" },
+          form: { style: "display:inline" } %>
+          </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No cancelled reservations.</p>
+  <% end %>
+<% end %>

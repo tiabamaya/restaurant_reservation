@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_01_064604) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_02_035724) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,8 +21,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_01_064604) do
     t.integer "party_size"
     t.datetime "reserved_at"
     t.integer "status"
+    t.bigint "time_slot_id", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["time_slot_id"], name: "index_reservations_on_time_slot_id"
     t.index ["user_id"], name: "index_reservations_on_user_id"
   end
 
@@ -39,6 +41,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_01_064604) do
     t.integer "max_tables"
     t.datetime "starts_at"
     t.datetime "updated_at", null: false
+    t.index ["starts_at"], name: "index_time_slots_on_starts_at", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -54,5 +57,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_01_064604) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "reservations", "time_slots"
   add_foreign_key "reservations", "users"
 end

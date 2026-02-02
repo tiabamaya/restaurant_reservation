@@ -21,12 +21,17 @@ end
   Table.find_or_create_by!(name: name) { |t| t.capacity = cap }
 end
 
-# TimeSlots (next 7 days, 9am–9pm hourly)
-(Date.current..Date.current+6.days).each do |date|
+# TimeSlots (next 3 months, 10am–9pm hourly)
+start_date = Date.current
+end_date   = Date.current + 3.months
+
+(start_date..end_date).each do |date|
   (9..21).each do |hour|
-    starts = date.to_time.change(hour: hour, min: 0)
+    starts = Time.zone.local(date.year, date.month, date.day, hour, 0, 0)
+
     TimeSlot.find_or_create_by!(starts_at: starts) do |s|
       s.max_tables = 5
+      s.active = true
     end
   end
 end

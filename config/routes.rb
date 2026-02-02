@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   resources :reservations, only: [:index, :show, :new, :create, :destroy] do
     collection do
     post :confirm
+    get :calendar
   end
 
     member do
@@ -23,11 +24,11 @@ Rails.application.routes.draw do
     root "dashboard#index"
     get "dashboard", to: "dashboard#index"
 
-      resources :time_slots, only: [:index, :new, :create, :edit, :update] do
+    resources :time_slots, only: [:new, :create, :edit, :update] do
       member { patch :toggle_active }
     end
 
-      resources :reservations, only: [:index] do
+    resources :reservations, only: [:index, :destroy] do
       member { patch :cancel }
     end
   end

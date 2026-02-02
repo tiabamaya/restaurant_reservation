@@ -1,9 +1,9 @@
-<h1>Reservation Confirmed ✅</h1>
+<h1>Reservation Confirmed </h1>
 
 <p>Thanks! Here are your reservation details:</p>
 
 <ul>
-  <li><strong>Date & Time:</strong> <%= @reservation.reserved_at.strftime("%B %d, %Y • %-I:%M %p") %></li>
+  <li><strong>Date & Time:</strong> <%= @reservation.time_slot.starts_at.strftime("%B %d, %Y • %-I:%M %p") %></li>
   <li><strong>Number of guests:</strong> <%= @reservation.party_size %></li>
   <li><strong>Contact name:</strong> <%= @reservation.contact_name %></li>
   <li><strong>Contact phone:</strong> <%= @reservation.contact_phone %></li>

@@ -1,0 +1,42 @@
+<h1>My Reservation Calendar</h1>
+
+<div class="toolbar">
+  <%= link_to "Prev Month", reservations_calendar_path(month: (@month - 1.month).strftime("%Y-%m")), class: "link" %>
+  <strong><%= @month.strftime("%B %Y") %></strong>
+  <%= link_to "Next Month", reservations_calendar_path(month: (@month + 1.month).strftime("%Y-%m")), class: "link" %>
+</div>
+
+<table class="calendar">
+  <thead>
+    <tr>
+      <% ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].each do |d| %>
+        <th><%= d %></th>
+      <% end %>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% start_day = @month.beginning_of_month.beginning_of_week(:sunday) %>
+    <% end_day   = @month.end_of_month.end_of_week(:sunday) %>
+
+    <% (start_day..end_day).to_a.in_groups_of(7).each do |week| %>
+      <tr>
+        <% week.each do |day| %>
+          <td class="<%= 'muted' if day.month != @month.month %>">
+            <div class="daynum"><%= day.day %></div>
+
+            <% if @by_date[day] %>
+              <% @by_date[day].each do |r| %>
+                <div class="chip <%= r.booked? ? 'chip-green' : 'chip-gray' %>">
+                  <%= r.reserved_at.strftime("%-I:%M %p") %> • <%= r.status %>
+                </div>
+              <% end %>
+            <% end %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<p><%= link_to "Back", reservations_path, class: "link" %></p>

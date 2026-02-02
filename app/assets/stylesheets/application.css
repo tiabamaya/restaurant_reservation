@@ -5,3 +5,89 @@
     text-decoration: none;
     border-radius: 6px;
 }
+
+.toolbar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin: 10px 0 18px;
+    flex-wrap: wrap;
+}
+
+.navlinks {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.link {
+    text-decoration: none;
+    margin-right: 8px;
+}
+
+table.calendar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.calendar th,
+table.calendar td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    vertical-align: top;
+    height: 110px;
+}
+
+table.calendar th {
+    background: #f5f5f5;
+}
+
+td.muted {
+    background: #fafafa;
+    color: #888;
+}
+
+.daynum {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.chip {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin: 3px 0;
+    font-size: 12px;
+}
+
+.chip-green {
+    background: #e7f7ee;
+    border: 1px solid #9ed9b2;
+}
+
+.chip-yellow {
+    background: #fff7d6;
+    border: 1px solid #f0d77a;
+}
+
+.chip-red {
+    background: #ffe3e3;
+    border: 1px solid #f0a0a0;
+}
+
+.chip-gray {
+    background: #f1f1f1;
+    border: 1px solid #ccc;
+}
+
+.small {
+    font-size: 12px;
+}
+
+.mutedtext {
+    color: #777;
+}

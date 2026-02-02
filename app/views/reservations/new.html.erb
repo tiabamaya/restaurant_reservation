@@ -1,27 +1,28 @@
 <h1>Book a Reservation</h1>
 
+<div class="toolbar">
 <%= form_with url: new_reservation_path, method: :get, local: true do %>
-  <%= date_field_tag :date, @selected_date %>
-  <%= submit_tag "OK" %>
+  <%= date_field_tag :date, @selected_date, min: Date.current %>
+  <%= submit_tag "Check Availability" %>
 <% end %>
+
+</div>
 
 <% if flash[:alert] %>
   <p style="color:red;"><%= flash[:alert] %></p>
 <% end %>
 
 <%= form_with model: @reservation, url: confirm_reservations_path, data: { turbo: false } do |f| %>
-  <p>
-    <%= f.label :reserved_at, "Time Slot" %><br>
+   <p>
+    <%= f.label :time_slot_id, "Time Slot" %><br>
 
-    <%= f.select :reserved_at,
+    <%= f.select :time_slot_id,
       @time_slots.map { |s|
-        label = "#{s.starts_at.strftime("%B %d, %Y • %-I:%M %p")} (#{s.available_tables} tables left)"
-        value = s.starts_at.change(sec: 0).iso8601
-        [label, value]
+        label = "#{s.starts_at.strftime("%B %d, %Y • %-I:%M %p")} (#{s.availability_label} tables left)"
+        [label, s.id]
       },
       { prompt: "Select a slot" }
     %>
-    
   </p>
 
   <p>

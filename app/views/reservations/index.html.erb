@@ -13,31 +13,55 @@
 
 <hr>
 
-<% if @reservations.blank? %>
-  <p>No reservations yet.</p>
+<% if @reservations.any? %>
+  <table class="res-table" border="1" cellpadding="10" style="border-collapse:collapse; width:100%;">
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Guests</th>
+        <th>Status</th>
+        <th style="width:220px;">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @reservations.each do |r| %>
+        <tr style="<%= 'opacity:0.7;' if r.cancelled? %>">
+          <td>
+            <%# Prefer time_slot.starts_at if available %>
+            <%= (r.time_slot&.starts_at || r.reserved_at).strftime("%B %d, %Y • %-I:%M %p") %>
+          </td>
+
+          <td><%= r.party_size %></td>
+
+          <td>
+            <% if r.booked? %>
+              <span style="padding:3px 8px; border:1px solid #2e7d32;">Booked</span>
+            <% else %>
+              <span style="padding:3px 8px; border:1px solid #777;">Cancelled</span>
+            <% end %>
+          </td>
+
+          <td>
+            <%= link_to "View", reservation_path(r) %>
+
+            <% if r.booked? && r.cancellable? %>
+              |
+              <%= button_to "Cancel",
+                    reservation_path(r),
+                    method: :delete,
+                    data: { confirm: "Cancel this reservation?" },
+                    form: { style: "display:inline" } %>
+            <% elsif r.booked? %>
+              <span style="margin-left:10px; font-size:0.9em; opacity:0.7;">
+                (Too late to cancel)
+              </span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 <% else %>
-  <ul>
-    <% @reservations.each do |r| %>
-      <li>
-        <strong><%= r.reserved_at.strftime("%B %d, %Y • %-I:%M %p") %></strong>
-        — Number of guests: <%= r.party_size %>
-
-        <%= link_to "View", reservation_path(r) %>
-        
-        — <%= r.status %>
-
-        <% if r.booked? %>
-          <%= button_to "Cancel",
-            reservation_path(r),
-            method: :delete,
-            data: { turbo_confirm: "Cancel this reservation?" } %>
-        <% end %>
-      </li>
-    <% end %>
-  </ul>
-<% end %>
-
-
-<% if current_user.admin? %>
-  <p><%= link_to "Go to Admin Dashboard", admin_root_path %></p>
+  <p>No reservations yet. Click “Book a Reservation”.</p>
 <% end %>

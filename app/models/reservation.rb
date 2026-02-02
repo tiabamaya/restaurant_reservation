@@ -1,50 +1,47 @@
 class Reservation < ApplicationRecord
   belongs_to :user
+  belongs_to :time_slot
 
   enum :status, { booked: 0, cancelled: 1 }
   scope :booked, -> { where(status: :booked) }
 
-  validates :reserved_at, presence: true
+  validates :time_slot, presence: true
   validates :party_size, presence: true, numericality: { greater_than: 0 }
   validates :contact_name, presence: true
   validates :contact_phone, presence: true
-  before_validation :normalize_reserved_at
+
+  before_validation :sync_reserved_at_from_slot
 
   validate :must_be_at_least_two_hours_ahead, if: :enforce_booking_rules?
   validate :slot_must_have_available_tables, if: :enforce_booking_rules?
-
 
   def cancellable?
     reserved_at.present? && reserved_at >= 2.hours.from_now
   end
 
-
   private
 
   def enforce_booking_rules?
-    booked? && (new_record? || will_save_change_to_reserved_at?)
+    booked? && (new_record? || will_save_change_to_time_slot_id?)
   end
 
   def must_be_at_least_two_hours_ahead
-    return if reserved_at.blank?
+    return if time_slot.blank?
 
-    if reserved_at < 2.hours.from_now
-      errors.add(:reserved_at, "must be at least 2 hours from now.") if reserved_at < 2.hours.from_now
+    if time_slot.starts_at < 2.hours.from_now
+      errors.add(:time_slot, "must be at least 2 hours from now.")
     end
   end
 
   def slot_must_have_available_tables
-    return if reserved_at.blank?
+    return if time_slot.blank?
 
-    normalized_time = reserved_at.change(sec: 0)
-
-    slot = TimeSlot.find_by(starts_at: reserved_at)
-    return errors.add(:reserved_at, "is not a valid slot.") if slot.nil?
-
-    errors.add(:reserved_at, "is fully booked.") if slot.available_tables <= 0
+    if time_slot.available_tables <= 0
+      errors.add(:time_slot, "is fully booked.")
+    end
   end
 
-  def normalize_reserved_at
-    self.reserved_at = reserved_at&.change(sec: 0)
+  def sync_reserved_at_from_slot
+    self.reserved_at = time_slot&.starts_at
   end
 end

@@ -1,6 +1,6 @@
 class ReservationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_availability, only: [:new, :confirm]
+  before_action :load_availability, only: [:new, :confirm, :create]
 
   def index
     @reservations = current_user.reservations.order(reserved_at: :asc)
@@ -14,7 +14,6 @@ class ReservationsController < ApplicationController
     @reservation = current_user.reservations.new
   end
 
-  # Step 1: Review page (not saved yet)
   def confirm
     @reservation = current_user.reservations.new(reservation_params)
     @reservation.status = :booked
@@ -23,12 +22,10 @@ class ReservationsController < ApplicationController
       render :confirm
     else
       flash.now[:alert] = @reservation.errors.full_messages.first
-      load_availability
       render :new, status: :unprocessable_entity
     end
   end
 
-  # Step 2: Final submit (saved here)
   def create
     @reservation = current_user.reservations.new(reservation_params)
     @reservation.status = :booked
@@ -36,7 +33,6 @@ class ReservationsController < ApplicationController
     if @reservation.save
       redirect_to confirmation_reservation_path(@reservation), notice: "Reservation booked!"
     else
-      load_availability
       flash.now[:alert] = @reservation.errors.full_messages.first
       render :new, status: :unprocessable_entity
     end
@@ -46,7 +42,6 @@ class ReservationsController < ApplicationController
     @reservation = current_user.reservations.find(params[:id])
   end
 
-  # Soft cancel
   def destroy
     reservation = current_user.reservations.find(params[:id])
 
@@ -62,27 +57,48 @@ class ReservationsController < ApplicationController
   private
 
   def reservation_params
-    params.require(:reservation).permit(:reserved_at, :party_size, :contact_name, :contact_phone)
+    params.require(:reservation).permit(:date, :time_slot_id, :party_size, :contact_name, :contact_phone)
   end
 
-  # This runs for new/confirm/create so NEW never crashes when re-rendered
- def load_availability
-    # keep the date stable (today -> next 6 days), so Feb 1 won't disappear
-    @dates = (Date.current..(Date.current + 6.days)).to_a
-
-    # selected date priority:
-    # 1) params[:date]
-    # 2) reservation reserved_at (when form submitted)
-    # 3) today
+def load_availability
+  @selected_date =
     if params[:date].present?
-      @selected_date = Date.parse(params[:date])
-    elsif params.dig(:reservation, :reserved_at).present?
-      @selected_date = Time.zone.parse(params[:reservation][:reserved_at]).to_date rescue Date.current
+      Date.parse(params[:date]) rescue Date.current
+    elsif params.dig(:reservation, :time_slot_id).present?
+      TimeSlot.find(params[:reservation][:time_slot_id]).starts_at.to_date rescue Date.current
     else
-      @selected_date = Date.current
+      Date.current
     end
 
-    day_range = @selected_date.beginning_of_day..@selected_date.end_of_day
-    @time_slots = TimeSlot.active.where(starts_at: day_range).order(:starts_at)
+  @selected_date = Date.current if @selected_date < Date.current
+
+  # ✅ Ensure slots exist for chosen date
+  TimeSlot.ensure_for_date!(@selected_date, open_hour: 9, close_hour: 21, interval_minutes: 60, max_tables: 5)
+
+  day_range = @selected_date.beginning_of_day..@selected_date.end_of_day
+  @time_slots = TimeSlot.active
+                        .where(starts_at: day_range)
+                        .where("starts_at >= ?", 2.hours.from_now)
+                        .order(:starts_at)
+end
+
+  #  This removes the "7-day limit" problem because slots get created on demand
+  def ensure_time_slots_for(date)
+    day_range = date.beginning_of_day..date.end_of_day
+    return if TimeSlot.where(starts_at: day_range).exists?
+
+    # example: 9AM to 9PM (adjust if you want)
+    start_hour = 9
+    end_hour   = 21
+
+    (start_hour..end_hour).each do |h|
+      starts_at = date.in_time_zone.change(hour: h, min: 0, sec: 0)
+
+      TimeSlot.create!(
+        starts_at: starts_at,
+        max_tables: 5,
+        active: true
+      )
+    end
   end
 end

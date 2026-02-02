@@ -4,7 +4,7 @@
   <%= date_field_tag :date, @date %>
   <%= submit_tag "OK" %>
 <% end %>
-
+  
 <p>
   <%= link_to "Prev", admin_time_slots_path(date: (@date - 1.day)) %> |
   <%= link_to "Next", admin_time_slots_path(date: (@date + 1.day)) %>
@@ -17,7 +17,7 @@
         <tr>
         <th>Starts At</th>
         <th>Max Tables</th>
-        <th>Active?</th>
+        <th>Active</th>
         <th>Available Tables</th>
         <th>Actions</th>
         </tr>

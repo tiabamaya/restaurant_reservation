@@ -1,0 +1,67 @@
+<h1>Admin Calendar (Availability)</h1>
+
+<div class="toolbar">
+  <%= link_to "Prev Month", admin_calendar_path(month: (@month - 1.month).strftime("%Y-%m")), class: "link" %>
+  <strong><%= @month.strftime("%B %Y") %></strong>
+  <%= link_to "Next Month", admin_calendar_path(month: (@month + 1.month).strftime("%Y-%m")), class: "link" %>
+</div>
+
+<table class="calendar">
+  <thead>
+    <tr>
+      <% ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].each do |d| %>
+        <th><%= d %></th>
+      <% end %>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% start_day = @month.beginning_of_month.beginning_of_week(:sunday) %>
+    <% end_day   = @month.end_of_month.end_of_week(:sunday) %>
+
+    <% (start_day..end_day).to_a.in_groups_of(7).each do |week| %>
+      <tr>
+        <% week.each do |day| %>
+          <td class="<%= 'muted' if day.month != @month.month %>">
+            <div class="daynum"><%= day.day %></div>
+
+            <% (@slots_by_date[day] || []).first(6).each do |slot| %>
+              <% available = @availability_by_time[slot.starts_at].to_i %>
+
+              <% css =
+                if available == 0
+                  "chip-red"
+                elsif available <= 2
+                  "chip-yellow"
+                else
+                  "chip-green"
+                end
+              %>
+
+              <div class="chip <%= css %>">
+                <%= slot.starts_at.strftime("%-I:%M%p") %> • <%= available %> left
+              </div>
+            <% end %>
+
+            <% if (@slots_by_date[day] || []).length > 6 %>
+              <div class="small mutedtext">+ more…</div>
+            <% end %>
+            <% slots = @slots_by_date[day] || [] %>
+
+            <% if slots.empty? && day >= Date.current %>
+              <div class="small">
+                <%= link_to "Generate slots",
+                  admin_dashboard_path(date: day),
+                  class: "link" %>
+              </div>
+            <% end %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<p>
+  <%= link_to "Back to Dashboard", admin_dashboard_path, class: "link" %>
+</p>
