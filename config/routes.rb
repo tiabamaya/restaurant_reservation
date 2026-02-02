@@ -31,6 +31,7 @@ Rails.application.routes.draw do
 
     resources :reservations, only: [:index, :destroy] do
       member { patch :cancel }
+      collection { get :calendar }
     end
   end
 end

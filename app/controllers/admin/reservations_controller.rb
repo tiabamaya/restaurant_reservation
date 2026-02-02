@@ -54,6 +54,7 @@ class Admin::ReservationsController < Admin::BaseController
       @slots_by_date = @time_slots.group_by { |s| s.starts_at.to_date }
   end
 
+
   private
 
   def set_date
