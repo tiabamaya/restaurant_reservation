@@ -8,11 +8,11 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-User.find_or_create_by!(email: "admin@test.com") do |u|
-  u.password = "password123"
-  u.password_confirmation = "password123"
-  u.role = :admin
-end
+admin = User.find_or_initialize_by(email: "admin@test.com")
+admin.password = "password123"
+admin.password_confirmation = "password123"
+admin.role = :admin
+admin.save!
 
 # Tables (capacity)
 [
