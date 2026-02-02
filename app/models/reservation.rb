@@ -2,6 +2,9 @@ class Reservation < ApplicationRecord
   belongs_to :user
   belongs_to :time_slot
 
+  validates :party_size, presence: true,
+                         numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 10 }
+
   enum :status, { booked: 0, cancelled: 1 }
   scope :booked, -> { where(status: :booked) }
 
